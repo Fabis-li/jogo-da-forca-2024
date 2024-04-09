@@ -4,7 +4,22 @@
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+
+
+
+
+            for (int tentativa = 0; tentativa < tentativasRestantes; tentativa++)
+            {
+
+
+            }
+            MensagemDerrota();
         }
+
+        
+
+
+
+
     }
 }
