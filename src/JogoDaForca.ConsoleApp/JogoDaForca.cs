@@ -1,123 +1,139 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace JogoDaForca.ConsoleApp
+﻿namespace JogoDaForca.ConsoleApp
 {
     public class JogoDaForca
     {
         string[] palavrasSecretas = {
             "ABACATE", "ABACAXI", "ACEROLA", "ACAI", "ARAÇA", "BACABA", "BACURI", "BANANA", "CAJA",
-            "CAJU", "CARAMBOLA", "CUPUAÇU", "GRAVIOLA", "GOIABA", "JABUTICABA", "JENIPAPO", "MAÇA",
+            "CAJU", "CARAMBOLA", "CUPUAÇU", "GRAVIOLA", "GOIABA", "JABUTICABA", "JENIPAPO", "MACA",
             "MANGABA", "MANGA", "MARACUJA", "MURICI", "PEQUI", "PITANGA", "PITAYA", "SAPOTI",
             "TANGERINA", "UMBU", "UVA", "UVAIA"
         };
 
-        public string PalavraAleatoria()
-        {
-            Random random = new Random();
-            string palavraSelecionada = palavrasSecretas[random.Next(0, palavrasSecretas.Length)];
-            return palavraSelecionada;
-        }
 
-        public char[] QtdeLetras(string palavraSelecionada)
+        private Random random = new Random();
+        private string palavraSelecionada;
+        private Palavra palavra;
+        private Jogador jogador;
+
+        public void IniciarJogo()
         {
-            char[] letrasCertas = new char[palavraSelecionada.Length];
-            for (int i = 0; i < letrasCertas.Length; i++)
+            palavraSelecionada = palavrasSecretas[random.Next(0, palavrasSecretas.Length)];
+            palavra = new Palavra(palavraSelecionada);
+            jogador = new Jogador();
+
+            while (!palavra.LetrasReveladas() && jogador.TentativasRestantes > 0)
             {
-                letrasCertas[i] = '_';
-            }
+                Console.Clear();
+                DesenharForca(jogador.TentativasRestantes);
+                Console.WriteLine(palavra.PalavraOculta());
+                Console.WriteLine($"Letras tentadas: {jogador.LetrasTentadas()}");
+                Console.WriteLine("Qual o seu chute? ");
+                char letra = Console.ReadLine().ToUpper()[0];
 
-            return letrasCertas;
-        }
-
-        private int tentativasRestantes = 5;
-        private char[] letrasTentadas = new char[26];
-
-        public void ExibirMenu(char[] letrasCertas, int tentativasRestantes, char[] letrasTentadas)
-        {
-            Console.WriteLine("Palavra" + string.Join(" ", letrasCertas));
-            Console.WriteLine("Tentativas restantes: " + tentativasRestantes);
-            Console.WriteLine("Letras tentadas: " + string.Join(" ", letrasTentadas));
-        }
-        public char ObterLetra()
-        {
-            Console.WriteLine("Digite uma letra:");
-            char letra = Console.ReadLine().ToUpper()[0];//
-            Console.WriteLine();
-            return letra;
-        }
-
-        public int VerificarEhLetra(int tentativa, char letra)
-        {
-            if (!char.IsLetter(letra))
-            {
-                Console.WriteLine("Digite apenas letras");
-                tentativa--;
-                continue;
-            }
-
-            return tentativa;
-        }
-
-        public int VerificaDuplicidadeLetra(int tentativa, char letra)
-        {
-            if (Array.IndexOf(letrasTentadas, letra) != -1)
-            {
-                Console.WriteLine("Você já tentou essa letra");
-                tentativa--;
-                continue;
-            }
-
-            return tentativa;
-        }
-
-        public void ObterPosicaoLetraTentada(char letra )
-        {
-            letrasTentadas[25 - (int)('Z' - letra)] = letra; // 25 - (int)('Z' - letra) é a posição da letra no array letrasTentadas
-        }
-
-        public bool VerificarAcertouLetra(string palavraSelecionada, char letra, char[] letrasCertas)
-        {
-            
-            bool acertou = false;
-            for (int i = 0; i < palavraSelecionada.Length; i++)
-            {
-                if (palavraSelecionada[i] == letra)
+                if (!jogador.Chute(letra))
                 {
-                    letrasCertas[i] = letra;
-                    acertou = true;
+                    Console.WriteLine("Letra inválida ou já tentada.");
+                    Console.WriteLine("Pressione Enter para continuar.");
+                    Console.ReadLine();
                 }
+                else if (palavra.RevelarLetra(letra))
+                {                    
+                    palavra.RevelarLetra(letra);
+                }
+                else                       
+                    jogador.DecrementarTentativas();
+                    
             }
+            Console.Clear();
+            DesenharForca(jogador.TentativasRestantes);
 
-            return acertou;
-        }
-        public void VerificarAcertouPalavra(bool acertou, char[] letrasCertas, string palavraSelecionada)
-        {
-            if (!acertou)
-            {
-                Console.WriteLine("Letra Incorreta");
-            }
-            else if (!letrasCertas.Contains('_'))
+            if (palavra.LetrasReveladas())
             {
                 Console.WriteLine("Parabéns, você acertou a palavra!");
-                Console.WriteLine("A palavra é: " + palavraSelecionada);
-                break;
             }
-        }
-
-        private static void MensagemDerrota(char[] letrasCertas, string palavraSelecionada)
-        {
-            if (letrasCertas.Contains('_'))
-            {
+            else
+            {                
                 Console.WriteLine("Você perdeu!");
-                Console.WriteLine("A palavra era: " + palavraSelecionada);
+                Console.WriteLine($"A palavra era: {palavraSelecionada}");
+            }
+        }       
+
+        public void DesenharForca(int erros)
+        {
+            switch (erros)
+            {
+                case 0:
+                    Console.WriteLine(" -----------");
+                    Console.WriteLine(" |/        |");
+                    Console.WriteLine(" |         o");
+                    Console.WriteLine(" |        /x\\");
+                    Console.WriteLine(" |         x");
+                    Console.WriteLine(" |        / \\");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine("_|____      ");
+                    break;
+
+                case 1:
+                    Console.WriteLine(" -----------");
+                    Console.WriteLine(" |/        |");
+                    Console.WriteLine(" |         o");
+                    Console.WriteLine(" |        /x\\");
+                    Console.WriteLine(" |         x");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine("_|____      ");
+                    break;
+
+                case 2:
+                    Console.WriteLine(" -----------");
+                    Console.WriteLine(" |/        |");
+                    Console.WriteLine(" |         o");
+                    Console.WriteLine(" |        /x");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine("_|____      ");
+                    break;
+
+                case 3:
+                    Console.WriteLine(" -----------");
+                    Console.WriteLine(" |/        |");
+                    Console.WriteLine(" |         o");
+                    Console.WriteLine(" |        / ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine("_|____      ");
+                    break;
+
+                case 4:
+                    Console.WriteLine(" -----------");
+                    Console.WriteLine(" |/        |");
+                    Console.WriteLine(" |         o");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine("_|____      ");
+                    break;
+
+                case 5:
+                    Console.WriteLine(" -----------");
+                    Console.WriteLine(" |/        |");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine(" |          ");
+                    Console.WriteLine("_|____      ");
+                    break;
             }
         }
-
-
-
     }
 }
