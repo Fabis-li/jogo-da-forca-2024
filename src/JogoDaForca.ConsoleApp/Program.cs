@@ -17,7 +17,8 @@
             char[] letrasCertas = new char[palavraSelecionada.Length];
             for (int i = 0; i < letrasCertas.Length; i++)
             {
-                letrasCertas[i] = '_';
+                letrasCertas[i] = '_'; 
+
             }
 
             int qtdeTentativasIniciais = 5;
